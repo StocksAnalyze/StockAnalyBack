@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
+const { connectDBs } = require("./db");
+const { cals } = connectDBs();
 
-// 데이터 모델 정의
 const calsSchema = new mongoose.Schema({
   회사명: {
     type: String,
@@ -71,6 +72,6 @@ const calsSchema = new mongoose.Schema({
   ],
 });
 
-// 모델 생성
-const Cals = mongoose.model("Cals", calsSchema, "Cals");
+//모델 생성
+const Cals = cals.model("Cals", calsSchema, "Cals");
 module.exports = Cals;

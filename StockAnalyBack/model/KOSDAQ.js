@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const { connectDBs } = require("./db");
+const { kosdaq } = connectDBs();
 
 const kosdaqSchema = new mongoose.Schema({
   _id: {
@@ -12,5 +14,5 @@ const kosdaqSchema = new mongoose.Schema({
   },
 });
 
-const KOSDAQ = mongoose.model("KOSDAQ", kosdaqSchema, "KOSDAQ");
+const KOSDAQ = kosdaq.model("KOSDAQ", kosdaqSchema, "KOSDAQ");
 module.exports = KOSDAQ;

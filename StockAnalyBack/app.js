@@ -10,16 +10,18 @@ require("dotenv").config();
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var stocksRouter = require("./routes/stocks");
-const MONGO_HOST = process.env.MONGO_HOST;
-mongoose
-  .connect(MONGO_HOST, {
-    retryWrites: true,
-    w: "majority",
-  })
-  .then(() => {
-    console.log("Connected Successful");
-  })
-  .catch((err) => console.log(err));
+// 환경변수에서 데이터베이스 URI 불러오기
+// const MONGO_HOST1 = process.env.MONGO_HOST1;
+
+// mongoose
+//   .connect(MONGO_HOST1, {
+//     retryWrites: true,
+//     w: "majority",
+//   })
+//   .then(() => {
+//     console.log("Connected Successful1");
+//   })
+//   .catch((err) => console.log(err));
 
 var app = express();
 

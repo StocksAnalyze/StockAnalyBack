@@ -34,6 +34,18 @@ router.get("/company", async (req, res, next) => {
   }
 });
 
+router.get("/companyname", async (req, res, next) => {
+  try {
+    const companies = await KOSDAQ.find();
+    // 각 문서에서 'company' 속성만 추출하여 새 배열 생성
+    const companyNames = companies.map((company) => company.company);
+    res.json(companyNames);
+  } catch (err) {
+    console.error("Error while fetching companies:", err);
+    next(err);
+  }
+});
+
 router.get("/cals/:ticker", async (req, res, next) => {
   const ticker = req.params.ticker;
 
@@ -54,12 +66,28 @@ router.get("/cals/:ticker", async (req, res, next) => {
   }
 });
 
-router.get("/probs/:ticker", async (req, res, next) => {
-  const ticker = req.params.ticker;
+// router.get("/probs", async (req, res, next) => {
+//   try {
+//     const probs = await Probs.find({});
+//     if (!probs) {
+//       return res.status(404).json({ message: "데이터가 없습니다." });
+//     }
+
+//     res.json({
+//       회사명: probs.회사명,
+//     });
+//   } catch (err) {
+//     console.error("회사 정보를 가져오는 동안 오류 발생:", err);
+//     next(err);
+//   }
+// });
+
+router.get("/probs/:company", async (req, res, next) => {
+  const company = req.params.company;
 
   try {
     // MongoDB에서 ticker 필드와 요청된 ticker 값이 일치하는 데이터를 찾습니다.
-    const prob = await Probs.findOne({ 티커: ticker });
+    const prob = await Probs.findOne({ 회사명: company });
 
     if (!prob) {
       return res
@@ -80,70 +108,74 @@ router.get("/probs/:ticker", async (req, res, next) => {
     // 나중에 mongoDB로 부터 불러오는 객체의 형식에 대한 공부를 하고 리팩토링 진행해봐야 할 듯.
     let arr = [
       {
-        "60 days MA Trend": prob.data[prob.data.length - 1]["60 days MA Trend"],
+        "60 days MA Trend":
+          prob.data[prob.data.length - 1]["60 days MA Trend"] * 100,
       },
       {
         "Base and Conversion Narrow Status":
-          prob.data[prob.data.length - 1]["Base and Conversion Narrow Status"],
+          prob.data[prob.data.length - 1]["Base and Conversion Narrow Status"] *
+          100,
       },
       {
         "Base and Conversion Narrow Status (for Lagging)":
           prob.data[prob.data.length - 1][
             "Base and Conversion Narrow Status (for Lagging)"
-          ],
+          ] * 100,
       },
-      { "MACD Status": prob.data[prob.data.length - 1]["MACD Status"] },
+      { "MACD Status": prob.data[prob.data.length - 1]["MACD Status"] * 100 },
       {
         "Lagging Span x Base and conversion":
-          prob.data[prob.data.length - 1]["Lagging Span x Base and conversion"],
+          prob.data[prob.data.length - 1][
+            "Lagging Span x Base and conversion"
+          ] * 100,
       },
       {
         "Lagging Span x Bong":
-          prob.data[prob.data.length - 1]["Lagging Span x Bong"],
+          prob.data[prob.data.length - 1]["Lagging Span x Bong"] * 100,
       },
       {
         "Leading Span Tail Direction":
-          prob.data[prob.data.length - 1]["Leading Span Tail Direction"],
+          prob.data[prob.data.length - 1]["Leading Span Tail Direction"] * 100,
       },
       {
         "Bong and Cloud Status":
-          prob.data[prob.data.length - 1]["Bong and Cloud Status"],
+          prob.data[prob.data.length - 1]["Bong and Cloud Status"] * 100,
       },
       {
         "Conversion x Base line":
-          prob.data[prob.data.length - 1]["Conversion x Base line"],
+          prob.data[prob.data.length - 1]["Conversion x Base line"] * 100,
       },
       {
         "Bong x Base and Conversion":
-          prob.data[prob.data.length - 1]["Bong x Base and Conversion"],
+          prob.data[prob.data.length - 1]["Bong x Base and Conversion"] * 100,
       },
       {
         "5day cross MA Check":
-          prob.data[prob.data.length - 1]["5day cross MA Check"],
+          prob.data[prob.data.length - 1]["5day cross MA Check"] * 100,
       },
       {
         "10day cross MA Check":
-          prob.data[prob.data.length - 1]["10day cross MA Check"],
+          prob.data[prob.data.length - 1]["10day cross MA Check"] * 100,
       },
       {
         "20day cross MA Check":
-          prob.data[prob.data.length - 1]["20day cross MA Check"],
+          prob.data[prob.data.length - 1]["20day cross MA Check"] * 100,
       },
       {
         "60day cross MA Check":
-          prob.data[prob.data.length - 1]["60day cross MA Check"],
+          prob.data[prob.data.length - 1]["60day cross MA Check"] * 100,
       },
       {
         "120day cross MA Check":
-          prob.data[prob.data.length - 1]["120day cross MA Check"],
+          prob.data[prob.data.length - 1]["120day cross MA Check"] * 100,
       },
       {
         "9day Highest Price Trend":
-          prob.data[prob.data.length - 1]["9day Highest Price Trend"],
+          prob.data[prob.data.length - 1]["9day Highest Price Trend"] * 100,
       },
       {
         "26day Highest Price Trend":
-          prob.data[prob.data.length - 1]["26day Highest Price Trend"],
+          prob.data[prob.data.length - 1]["26day Highest Price Trend"] * 100,
       },
     ];
 
@@ -159,9 +191,7 @@ router.get("/probs/:ticker", async (req, res, next) => {
     });
 
     res.json({
-      회사명: prob.회사명,
-      티커: prob.티커,
-      arr: arr,
+      data: arr,
     });
   } catch (err) {
     console.error("회사 정보를 가져오는 동안 오류 발생:", err);

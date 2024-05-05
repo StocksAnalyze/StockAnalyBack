@@ -4,6 +4,7 @@ const _ = require("lodash"); // lodash를 불러옵니다.
 
 let Cals = require("../model/Cals");
 let KOSDAQ = require("../model/KOSDAQ");
+let KOSPI = require("../model/KOSPI");
 let Probs = require("../model/Probs");
 
 router.get("/company/:code", async (req, res, next) => {
@@ -34,12 +35,48 @@ router.get("/company", async (req, res, next) => {
   }
 });
 
-router.get("/companyname", async (req, res, next) => {
+router.get("/kosdaq/company", async (req, res, next) => {
   try {
     const companies = await KOSDAQ.find();
     // 각 문서에서 'company' 속성만 추출하여 새 배열 생성
     const companyNames = companies.map((company) => company.company);
     res.json(companyNames);
+  } catch (err) {
+    console.error("Error while fetching companies:", err);
+    next(err);
+  }
+});
+
+router.get("/kospi/company", async (req, res, next) => {
+  try {
+    const companies = await KOSPI.find();
+    // 각 문서에서 'company' 속성만 추출하여 새 배열 생성
+    const companyNames = companies.map((company) => company.company);
+    res.json(companyNames);
+  } catch (err) {
+    console.error("Error while fetching companies:", err);
+    next(err);
+  }
+});
+
+router.get("/allcompany", async (req, res, next) => {
+  try {
+    // KOSDAQ과 KOSPI에서 회사 목록을 동시에 조회
+    const [kosdaqCompanies, kospiCompanies] = await Promise.all([
+      KOSDAQ.find(),
+      KOSPI.find(),
+    ]);
+
+    // 각 문서에서 'company' 속성만 추출하여 새 배열 생성
+    const kosdaqCompanyNames = kosdaqCompanies.map(
+      (company) => company.company
+    );
+    const kospiCompanyNames = kospiCompanies.map((company) => company.company);
+
+    // 두 시장의 회사 목록을 합침
+    const allCompanyNames = kosdaqCompanyNames.concat(kospiCompanyNames);
+
+    res.json(allCompanyNames);
   } catch (err) {
     console.error("Error while fetching companies:", err);
     next(err);

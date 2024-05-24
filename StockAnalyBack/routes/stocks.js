@@ -6,6 +6,7 @@ let Cals = require("../model/Cals");
 let KOSDAQ = require("../model/KOSDAQ");
 let KOSPI = require("../model/KOSPI");
 let Probs = require("../model/Probs");
+let Info = require("../model/Info");
 
 router.get("/company/:code", async (req, res, next) => {
   const code = req.params.code; // 클라이언트로부터 전달된 code 값
@@ -97,6 +98,34 @@ router.get("/cals/:ticker", async (req, res, next) => {
     }
 
     res.json(company);
+  } catch (err) {
+    console.error("회사 정보를 가져오는 동안 오류 발생:", err);
+    next(err);
+  }
+});
+
+router.get("/info/:company", async (req, res, next) => {
+  const company = req.params.company;
+
+  try {
+    // MongoDB에서 ticker 필드와 요청된 ticker 값이 일치하는 데이터를 찾습니다.
+    const info = await Info.findOne({ 회사명: company });
+
+    if (!info) {
+      return res
+        .status(404)
+        .json({ message: "해당 티커에 대한 데이터를 찾을 수 없습니다." });
+    }
+
+    // 배열의 길이를 구합니다
+    let arrayLength = info.data.length;
+
+    // 배열의 마지막 30개 요소를 잘라냅니다
+    let last30DaysElements = info.data.slice(arrayLength - 30);
+
+    res.json({
+      data: last30DaysElements,
+    });
   } catch (err) {
     console.error("회사 정보를 가져오는 동안 오류 발생:", err);
     next(err);
